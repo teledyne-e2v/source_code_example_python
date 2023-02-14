@@ -59,7 +59,7 @@ def take_image(image_name):
     
     
 for i in range(4):
-    ctrl_funtions_example.set_analog_gain(fd,i*4)
+    ctrl_functions_example.set_analog_gain(fd,i)
     time.sleep(1)
     take_image("test"+str(i)+".raw")
     
