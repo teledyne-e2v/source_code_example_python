@@ -1,10 +1,10 @@
 import v4l2
 from fcntl import ioctl 
-fd = open('/dev/video0', 'rw')
-cp = v4l2.v4l2_capability()
-ioctl(fd, v4l2.VIDIOC_QUERYCAP, cp)
-print(cp.driver)
-print(cp.card)
+#fd = open('/dev/video0', 'rw')
+#cp = v4l2.v4l2_capability()
+#ioctl(fd, v4l2.VIDIOC_QUERYCAP, cp)
+#print(cp.driver)
+#print(cp.card)
 
 def control_set(device,code,value):
     ecs = v4l2.v4l2_ext_controls(v4l2.V4L2_CTRL_CLASS_CAMERA, 1)
@@ -15,7 +15,7 @@ def control_set(device,code,value):
     ec[0].value64 = value
     ec[0].size = 0
     ecs.controls = ec
-    ioctl(fd, v4l2.VIDIOC_S_EXT_CTRLS, ecs) #set the control using v4l2 drivers
+    ioctl(device, v4l2.VIDIOC_S_EXT_CTRLS, ecs) #set the control using v4l2 drivers
 
 def control_get(device,code):
     ecs = v4l2.v4l2_ext_controls(v4l2.V4L2_CTRL_CLASS_CAMERA, 1)
@@ -25,7 +25,7 @@ def control_get(device,code):
     ecs.ctrl_class = v4l2.V4L2_CTRL_CLASS_CAMERA
     ec[0].size = 0
     ecs.controls = ec
-    ioctl(fd, v4l2.VIDIOC_G_EXT_CTRLS, ecs) #set the control using v4l2 drivers
+    ioctl(device, v4l2.VIDIOC_G_EXT_CTRLS, ecs) #set the control using v4l2 drivers
     return ecs.controls.ec[0].value64
 
 # control the analog gain
