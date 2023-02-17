@@ -58,8 +58,8 @@ def take_image(image_name):
         fcntl.ioctl(fd, v4l2.VIDIOC_QBUF, buf)
     
     
-for i in range(4):
-    ctrl_functions_example.set_analog_gain(fd,i)
+for i in range(16):
+    ctrl_functions_example.set_digital_gain(fd,i*500)
     time.sleep(1)
     take_image("test"+str(i)+".raw")
     
