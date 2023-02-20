@@ -13,7 +13,7 @@ import os
 fd = None
 ctrl_list=dict()
 
-def initialize(v4l2_flux='/dev/video0'):
+def initialize(sensor_mode=2,v4l2_flux='/dev/video0'):
     global fd
     fd = open(v4l2_flux, 'rb+', buffering=0) #open the device
     
@@ -24,7 +24,6 @@ def initialize(v4l2_flux='/dev/video0'):
     os.system("v4l2-ctl -l > /tmp/ctrls_list.txt") # save the v4l2-ctrl in a tmp file 
     
     ctrls= open('/tmp/ctrls_list.txt', 'r') # open this file
-    
     line=ctrls.readline()
     while(line): # Parse the file to get informations
         infos=dict()
@@ -51,12 +50,42 @@ def initialize(v4l2_flux='/dev/video0'):
                     
                 ctrl_list[splited[0]]=infos.copy()
         line=ctrls.readline()
+    
+    fmt = v4l2.v4l2_format()
+    fmt.type = v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    fmt.fmt.pix.field = v4l2.V4L2_FIELD_NONE;
+    if(sensor_mode==2):
+        fmt.fmt.pix.width = 1920;
+        fmt.fmt.pix.height = 1080;
+        fmt.fmt.pix.pixelformat = v4l2.V4L2_PIX_FMT_GREY;
+        set_control_value("sensor_mode",2)
+    elif(sensor_mode==0):
+        fmt.fmt.pix.width = 1920;
+        fmt.fmt.pix.height = 1080;
+        fmt.fmt.pix.pixelformat = v4l2.V4L2_PIX_FMT_Y10;
+        set_control_value("sensor_mode",0)
+    elif(sensor_mode==1):
+        fmt.fmt.pix.width = 1920;
+        fmt.fmt.pix.height = 800;
+        fmt.fmt.pix.pixelformat = v4l2.V4L2_PIX_FMT_Y10;
+        set_control_value("sensor_mode",1)
+    elif(sensor_mode==3):
+        fmt.fmt.pix.width = 1920;
+        fmt.fmt.pix.height = 800;
+        fmt.fmt.pix.pixelformat = v4l2.V4L2_PIX_FMT_GREY;
+        set_control_value("sensor_mode",3)
+        
+    fcntl.ioctl(fd, v4l2.VIDIOC_S_FMT, fmt);
 
 def close(v4l2_flux='/dev/video0'): # close the flux
     if(fd == None):
         print("error : flux closed")
         exit(0)
     fd.close()
+
+
+def get_device():
+    return fd
 
 def get_device_controls():
     return ctrl_list.keys()
