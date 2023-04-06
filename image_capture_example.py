@@ -10,16 +10,14 @@ import fcntl
 import mmap
 import time
 import api
-
-fd = open('/dev/video0', 'rb+', buffering=0)
+api.initialize(sensor_mode=1)
+fd = api.get_device()
 print(">> get device capabilities")
 cp = v4l2.v4l2_capability()
 fcntl.ioctl(fd, v4l2.VIDIOC_QUERYCAP, cp)
 
 
-
 print(">> device setup")
-api.initialize(sensor_mode=1)
 
 print(">> init mmap capture")
 req = v4l2.v4l2_requestbuffers()
@@ -29,6 +27,7 @@ req.count = 1  # nr of buffer frames
 fcntl.ioctl(fd, v4l2.VIDIOC_REQBUFS, req)  # tell the driver that we want some buffers 
 print("req.count", req.count)
 buffers = []
+
 
 print(">>> VIDIOC_QUERYBUF, mmap, VIDIOC_QBUF")
 for ind in range(req.count):
@@ -48,6 +47,17 @@ buf_type = v4l2.v4l2_buf_type(v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE)
 fcntl.ioctl(fd, v4l2.VIDIOC_STREAMON, buf_type)
 
 def take_image(image_name):
+    
+#    for i in range(3):
+#        buf = v4l2.v4l2_buffer()
+#        buf.type = v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE
+#        buf.memory = v4l2.V4L2_MEMORY_MMAP
+#        fcntl.ioctl(fd, v4l2.VIDIOC_DQBUF, buf)  # get image from the driver queue
+#        mm = buffers[buf.index]
+#        mm.read(len(mm))
+#        mm.seek(0)
+#        fcntl.ioctl(fd, v4l2.VIDIOC_QBUF, buf)
+    # Reactivate streaming
     with open(image_name, "wb") as binary_file:
         buf = v4l2.v4l2_buffer()
         buf.type = v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE
@@ -57,19 +67,20 @@ def take_image(image_name):
         binary_file.write(mm.read(len(mm)))
         mm.seek(0)
         fcntl.ioctl(fd, v4l2.VIDIOC_QBUF, buf)
+
+api.set_control_value("test_pattern",1)
+time.sleep(0.2)
+for i in range(1,10):
+    api.set_control_value("test_pattern",i%2+1)
+    time.sleep(0.2)
+    take_image("10bit_"+str(i)+".raw")
     
-    
-for i in range(5):
-    api.set_control_value("digital_gain",i*500)
-    time.sleep(1)
-    take_image("test"+str(i)+".raw")
-    
-  
+
 print(">> Stop streaming")
 fcntl.ioctl(fd, v4l2.VIDIOC_STREAMOFF, buf_type)
 for i in buffers:
     i.close()
-fd.close()
+api.close()
 
   
      

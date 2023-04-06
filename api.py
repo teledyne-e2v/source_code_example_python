@@ -55,26 +55,25 @@ def initialize(sensor_mode=2,v4l2_flux='/dev/video0'):
     fmt.type = v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE;
     fmt.fmt.pix.field = v4l2.V4L2_FIELD_NONE;
     if(sensor_mode==2):
-        fmt.fmt.pix.width = 1920;
-        fmt.fmt.pix.height = 1080;
+        fmt.fmt.pix.width = 1920
+        fmt.fmt.pix.height = 1080
         fmt.fmt.pix.pixelformat = v4l2.V4L2_PIX_FMT_GREY;
         set_control_value("sensor_mode",2)
     elif(sensor_mode==0):
-        fmt.fmt.pix.width = 1920;
-        fmt.fmt.pix.height = 1080;
+        fmt.fmt.pix.width = 1920
+        fmt.fmt.pix.height = 1080
         fmt.fmt.pix.pixelformat = v4l2.V4L2_PIX_FMT_Y10;
         set_control_value("sensor_mode",0)
     elif(sensor_mode==1):
-        fmt.fmt.pix.width = 1920;
-        fmt.fmt.pix.height = 800;
+        fmt.fmt.pix.width = 1920
+        fmt.fmt.pix.height = 800
         fmt.fmt.pix.pixelformat = v4l2.V4L2_PIX_FMT_Y10;
         set_control_value("sensor_mode",1)
     elif(sensor_mode==3):
         fmt.fmt.pix.width = 1920;
-        fmt.fmt.pix.height = 800;
+        fmt.fmt.pix.height = 80
         fmt.fmt.pix.pixelformat = v4l2.V4L2_PIX_FMT_GREY;
         set_control_value("sensor_mode",3)
-        
     fcntl.ioctl(fd, v4l2.VIDIOC_S_FMT, fmt);
 
 def close(v4l2_flux='/dev/video0'): # close the flux
@@ -92,6 +91,39 @@ def get_device_controls():
 
 def get_control_info(control_name):
     return ctrl_list[control_name]
+
+
+def set_controls(controls_dict):
+    
+    if(fd ==None or fd.closed): #check if file opened
+        print("error : initialize the connection with the function initialize()")
+        exit(0)
+    ecs = v4l2.v4l2_ext_controls(v4l2.V4L2_CTRL_CLASS_CAMERA, 1) #create the structure used by v4l2
+    ecs.count = len(controls_dict.keys()) #set the number of controls 
+    ecs.ctrl_class = v4l2.V4L2_CTRL_CLASS_CAMERA # set the class containing the controls
+    ec = (v4l2.v4l2_ext_control * len(controls_dict.keys()))() #list of controls 
+    i=0
+    for ctrl in controls_dict.keys():
+        controls_dict[ctrl]
+        if(controls_dict[ctrl]>ctrl_list[ctrl]["maximum"]): #check maximum
+            print("value is above maxium, take a look at control informations with the function get_control_info(control_name), value set to maximum")
+            controls_dict[ctrl]=ctrl_list[ctrl]["maximum"]
+        elif(controls_dict[ctrl]<ctrl_list[ctrl]["minimum"]): #check minimum
+            print("value is under minimum, take a look at control informations with the function get_control_info(control_name), value set to minimum")
+            controls_dict[ctrl]=ctrl_list[ctrl]["minimum"]
+        if (ctrl_list[ctrl]["maximum"] - controls_dict[ctrl]) % ctrl_list[ctrl]["step"]!=0: #check step
+            print("value isn't in the steps, take a look at control informations with the function get_control_info(control_name), value decreased to match step")
+            controls_dict[ctrl]-=(ctrl_list[ctrl]["maximum"] - controls_dict[ctrl]) % ctrl_list[ctrl]["step"]        
+        
+        ec[i].id = int(ctrl_list[ctrl]["id"][2:],16)#set the id of the control
+        ec[i].value = controls_dict[ctrl]
+        ec[i].value64 = controls_dict[ctrl]
+        ec[i].size = 0 # initialisation (not important)
+        i+=1
+    ecs.controls = ec # set control list into the structure 
+    fcntl.ioctl(fd, v4l2.VIDIOC_S_EXT_CTRLS, ecs) #set the control using v4l2 drivers
+        
+    
 
 def get_controls_info():
     return ctrl_list
