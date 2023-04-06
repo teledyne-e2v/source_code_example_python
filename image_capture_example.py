@@ -47,7 +47,7 @@ buf_type = v4l2.v4l2_buf_type(v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE)
 fcntl.ioctl(fd, v4l2.VIDIOC_STREAMON, buf_type)
 
 def take_image(image_name):
-    
+    # IMPORTANT : Just bellow you can uncomment to clean the insternal queue of the driver
 #    for i in range(3):
 #        buf = v4l2.v4l2_buffer()
 #        buf.type = v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE
