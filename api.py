@@ -10,12 +10,9 @@ import fcntl
 import os
 
 
-fd = None
 ctrl_list=dict()
 
-def initialize(sensor_mode=2,v4l2_flux='/dev/video0'): # start the driver with a configurable sensor mode. (Initialization is necessary before using any other function)
-    global fd
-    fd = open(v4l2_flux, 'rb+', buffering=0) #open the device
+def initialize(fd,sensor_mode=2): # start the driver with a configurable sensor mode. (Initialization is necessary before using any other function)
     
     if(fd.closed): #check if it opened well
         print("error : can't open ",v4l2_flux)
@@ -52,48 +49,45 @@ def initialize(sensor_mode=2,v4l2_flux='/dev/video0'): # start the driver with a
         line=ctrls.readline()
     
     fmt = v4l2.v4l2_format()
-    fmt.type = v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    fmt.fmt.pix.field = v4l2.V4L2_FIELD_NONE;
+    fmt.type = v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE
+    fmt.fmt.pix.field = v4l2.V4L2_FIELD_NONE
     if(sensor_mode==2):
         fmt.fmt.pix.width = 1920
         fmt.fmt.pix.height = 1080
-        fmt.fmt.pix.pixelformat = v4l2.V4L2_PIX_FMT_GREY;
-        set_control_value("sensor_mode",2)
+        fmt.fmt.pix.pixelformat = v4l2.V4L2_PIX_FMT_GREY
+        set_control_value(fd,"sensor_mode",2)
     elif(sensor_mode==0):
         fmt.fmt.pix.width = 1920
         fmt.fmt.pix.height = 1080
-        fmt.fmt.pix.pixelformat = v4l2.V4L2_PIX_FMT_Y10;
-        set_control_value("sensor_mode",0)
+        fmt.fmt.pix.pixelformat = v4l2.V4L2_PIX_FMT_Y10
+        set_control_value(fd,"sensor_mode",0)
     elif(sensor_mode==1):
         fmt.fmt.pix.width = 1920
         fmt.fmt.pix.height = 800
-        fmt.fmt.pix.pixelformat = v4l2.V4L2_PIX_FMT_Y10;
-        set_control_value("sensor_mode",1)
+        fmt.fmt.pix.pixelformat = v4l2.V4L2_PIX_FMT_Y10
+        set_control_value(fd,"sensor_mode",1)
     elif(sensor_mode==3):
-        fmt.fmt.pix.width = 1920;
+        fmt.fmt.pix.width = 1920
         fmt.fmt.pix.height = 80
-        fmt.fmt.pix.pixelformat = v4l2.V4L2_PIX_FMT_GREY;
-        set_control_value("sensor_mode",3)
-    fcntl.ioctl(fd, v4l2.VIDIOC_S_FMT, fmt);
+        fmt.fmt.pix.pixelformat = v4l2.V4L2_PIX_FMT_GREY
+        set_control_value(fd,"sensor_mode",3)
+    fcntl.ioctl(fd, v4l2.VIDIOC_S_FMT, fmt)
 
-def close(v4l2_flux='/dev/video0'): # closes the access to the driver, must be used last, no other function must be called after this one (except if you want to do an initialization again)
+def close(fd): # closes the access to the driver, must be used last, no other function must be called after this one (except if you want to do an initialization again)
     if(fd == None):
         print("error : flux closed")
         exit(0)
     fd.close()
 
 
-def get_device(): # return the device 
-    return fd
-
-def get_device_controls(): # return all names of controls in an array
+def get_device_controls(fd): # return all names of controls in an array
     return ctrl_list.keys()
 
-def get_control_info(control_name): # return all information about control example (min, max, default value ...) in a dict.
+def get_control_info(fd,control_name): # return all information about control example (min, max, default value ...) in a dict.
     return ctrl_list[control_name]
 
 
-def set_controls(controls_dict): # use a dictionary to set controls to value
+def set_controls(fd,controls_dict): # use a dictionary to set controls to value
     
     if(fd ==None or fd.closed): #check if file opened
         print("error : initialize the connection with the function initialize()")
@@ -125,10 +119,10 @@ def set_controls(controls_dict): # use a dictionary to set controls to value
         
     
 
-def get_controls_info(): # return the dictionary with all controls informations 
+def get_controls_info(fd): # return the dictionary with all controls informations 
     return ctrl_list
 
-def set_control_value(control_name,value): # Allows to retrieve the whole value of a control from its name.
+def set_control_value(fd,control_name,value): # Allows to retrieve the whole value of a control from its name.
     if(fd ==None or fd.closed): #check if file opened
         print("error : initialize the connection with the function initialize()")
         exit(0)
@@ -155,7 +149,7 @@ def set_control_value(control_name,value): # Allows to retrieve the whole value 
     ecs.controls = ec # set control list into the structure
     fcntl.ioctl(fd, v4l2.VIDIOC_S_EXT_CTRLS, ecs) #set the control using v4l2 drivers
     
-def get_control_value(control_name): # Allows to assign a value to a control from its name.
+def get_control_value(fd,control_name): # Allows to assign a value to a control from its name.
     if(fd == None or fd.closed):
         print("error : initialize the connection with the function initialize()")
         exit(0)
