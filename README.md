@@ -34,6 +34,11 @@ GPIO_example.py brings an example of control of the pins of the nano jetson allo
 
 
 # Image Capture
+
+## Install V4L2 tools
+```
+sudo apt install v4l-utils
+```
 ## Install pip2 for python2 package installation
 ``` 
 sudo apt update
