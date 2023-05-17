@@ -34,6 +34,22 @@ GPIO_example.py brings an example of control of the pins of the nano jetson allo
 
 
 # Image Capture
+## Install pip2 for python2 package installation
+``` 
+sudo apt update
+sudo apt install python-pip
+```
+## Install v4l2 package for python 2.7.17 (preinstalled in the Jetson image)
+
+```
+pip2 install v4l2
+```
+
+## Run script
+```
+python image_capture_example.py
+```
+
 
 image_capture_example.py provides an example of taking a sequence of images by changing some sensor parameters between each image. In this file you can also find functions to drive the sensor which are different from the api (less complex, address of the controls defined in static).
 The program will take a sequence of RAW images and customize the controls applied to each image as you wish.
