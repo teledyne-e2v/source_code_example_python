@@ -7,6 +7,7 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation 
+import api
 
 vd = open('/dev/video0', 'rb+', buffering=0)
 
@@ -15,8 +16,9 @@ cp = v4l2_capability()
 fcntl.ioctl(vd, VIDIOC_QUERYCAP, cp)
 
 print(">> device setup")
-fmt = v4l2_format()
-fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE
+#fmt = v4l2_format()
+#fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE
+api.initialize(vd,sensor_mode=2) 
 
 print(">> init mmap capture")
 req = v4l2_requestbuffers()
