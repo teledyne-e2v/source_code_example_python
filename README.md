@@ -39,15 +39,15 @@ GPIO_example.py brings an example of control of the pins of the nano jetson allo
 ```
 sudo apt install v4l-utils
 ```
-## Install pip2 for python2 package installation
+## Install pip for python2 package installation
 ``` 
 sudo apt update
 sudo apt install python-pip
 ```
-## Install v4l2 package for python 2.7.17 (preinstalled in the Jetson image)
+## Install v4l2 package for python2
 
 ```
-pip2 install v4l2
+pip install v4l2
 ```
 
 ## Run script
@@ -63,3 +63,19 @@ It is also possible to change the format to take picture in Y10 or GRAY8. Y10 im
 # Video display with matplolib
 
 video_flux_and_capture_numpy_matplotlib.py provides an example of streaming the video flux using matplotlib, you can also see in the code how to put the images in a numpy array. This codes provides really bad streaming performances with a maxmum of 5/10 fps this is due to the usage of matplotlib, it hasn't been develop for video streaming, we are using it only to show how to use the driver with numpy.
+
+Prerequies:
+```
+sudo apt-get install libfreetype6-dev pkg-config libpng-dev pkg-config
+```
+```
+pip install numpy
+```
+```
+pip install matplotlib
+```
+
+Start the example:
+```
+python video_flux_and_capture_numpy_matplotlib.py
+```
